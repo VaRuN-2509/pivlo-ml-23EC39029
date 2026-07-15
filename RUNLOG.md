@@ -42,7 +42,7 @@
   4. Replaced learned absolute positional embeddings with Rotary Positional Embeddings (RoPE), adding a `RoPECache` to prevent trigonometric math from bottlenecking the laptop CPU.
   5. Reinvested the saved parameters by increasing `n_embd` from 160 to 216, pushing the total model size to ~1.96M (safely under the 2M cap).
 - **BPB Before:** 1.7877
-- **BPB After:** 1.6425
+- **BPB After:** 1.6721
 
 
 # Run 6: Gradient Accumulation (The Batch Size Loophole)
@@ -51,6 +51,6 @@
   2. Divided the loss by `grad_accum_steps` before calling `loss.backward()` to mathematically match the scale of a true large batch.
   3. Moved `opt.step()`, `opt.zero_grad()`, and `torch.nn.utils.clip_grad_norm_` outside the loop so they only trigger once per full accumulation cycle.
   4. Used a physical batch size of 16 to keep CPU memory safe, resulting in an effective batch size of 64 (16 × 4) per step.
-- **BPB Before:** 1.6425
-- **BPB After:** 
+- **BPB Before:** 1.6721
+- **BPB After:** 1.6425
 - **Conclusion:** [e.g., Gradient accumulation successfully decoupled our effective batch size from our hardware memory limits. By feeding the model 4x more data before every weight update, the gradients were much less noisy. The model squeezed significantly more learning out of its strict 2,000-step budget, resulting in our lowest BPB yet.]

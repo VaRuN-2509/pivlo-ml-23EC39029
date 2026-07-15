@@ -211,10 +211,11 @@ class GPT(nn.Module):
             x = block(x)
         x = self.ln_f(x)
         
+        # Calculate logits for ALL tokens in the sequence
+        logits = self.head(x)
+        
         if targets is not None:
-            logits = self.head(x)
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
             return logits, loss
         
-        logits = self.head(x[:, -1:, :])
         return logits, None
